@@ -17,7 +17,9 @@ walkDir = (dir, callback) ->
     for file in files
       fPath = path.join dir, file
       stat = fs.statSync fPath
-      src.push {fPath: fPath, size: stat.size}
+      #only deal with flat dir now
+      if stat.isFile()
+        src.push {fPath: fPath, size: stat.size}
     callback null, src
 
 isHashEqual = (src, desc) ->
