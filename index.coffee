@@ -39,8 +39,8 @@ async.parallel [
 
     for item in srcFiles
       same = _.where(benchFiles, {'size': item.size})
-      console.log same
-      item.repeated = same.length > 0 and isHashEqual(item.fPath, same[0].fPath)
+      console.log same if same.length > 0
+      item.repeated = same.length > 0 and isHashEqual(item.fPath, same[0].fPath) #TODO maybe there are many repeated?
 
     for item in srcFiles when item.repeated is not true
       console.log item.fPath
