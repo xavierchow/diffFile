@@ -3,22 +3,34 @@ path = require 'path'
 async = require 'async'
 _ = require 'lodash'
 md5 = require 'MD5'
+program = require 'commander'
 
-srcDir = process.argv[2]
-benchmark = process.argv[3]
-if process.argv[4]? and process.argv[4] is '-o'
-  out = process.argv[5]
+program.version('0.0.1')
+  .option('-s, --srcDir [srcDir]', 'src dir')
+  .option('-b, --benchmark [benchmark]', 'benchmark dir')
+  .option('-e, --ext [extension]', 'excluding file extension')
+  .option('-o, --out [out]', 'output dir')
+  .parse(process.argv)
+{srcDir, benchmark, ext, out } = program
+if ext? and ext.indexOf('.') is -1
+  ext = ".#{ext}"
+
+
+isExcluded = (file, ext) ->
+  return false unless ext?
+  path.extname(file) is ext
 
 walkDir = (dir, callback) ->
   fs.readdir dir, (err, files) ->
     if err
       return callback err
     src = []
+    console.log ext
     for file in files
       fPath = path.join dir, file
       stat = fs.statSync fPath
       #only deal with flat dir now
-      if stat.isFile()
+      if stat.isFile() and not isExcluded(file, ext)
         src.push {fPath: fPath, size: stat.size}
     callback null, src
 
