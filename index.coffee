@@ -1,4 +1,4 @@
-fs = require 'fs'
+fs = require 'fs-extra'
 path = require 'path'
 async = require 'async'
 _ = require 'lodash'
@@ -42,8 +42,18 @@ async.parallel [
     for item in srcFiles
       same = _.where(benchFiles, {'size': item.size})
       console.log same if same.length > 0
-      item.repeated = same.length > 0 and isHashEqual(item.fPath, same[0].fPath) #TODO maybe there are many repeated?
+      item.repeated = false
+      for candidate in same
+        if isHashEqual(item.fPath, candidate.fPath)
+          item.repeated = true
+          break
 
-    for item in srcFiles when item.repeated is not true
+    for item in srcFiles when item.repeated is false
       console.log item.fPath
       console.log item.size
+      if out?
+        fs.mkdirsSync(out)
+        fName = path.basename(item.fPath)
+        fs.copySync(item.fPath, path.join(out, fName))
+
+
